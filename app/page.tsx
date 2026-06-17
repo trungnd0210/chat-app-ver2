@@ -1,0 +1,15 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+
+// Trang gốc: điều hướng theo trạng thái đăng nhập.
+export default async function Home() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/chat");
+  }
+  redirect("/login");
+}
