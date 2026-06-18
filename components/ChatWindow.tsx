@@ -126,7 +126,7 @@ export default function ChatWindow({
                       setMenuOpen(false);
                       if (
                         confirm(
-                          "Delete this entire conversation? All messages will be removed for both people."
+                          "Delete this conversation? It will be removed only on your side — the other person still keeps it."
                         )
                       ) {
                         onDeleteConversation();
@@ -215,7 +215,8 @@ function MessageGroups({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (confirm("Delete this message?")) onDelete(m.id);
+                    if (confirm("Delete this message on your side?"))
+                      onDelete(m.id);
                   }}
                   title="Delete message"
                   className={cn(

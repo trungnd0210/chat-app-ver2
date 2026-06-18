@@ -41,7 +41,7 @@
 > Nếu bạn đã chạy `schema.sql` từ trước, chỉ cần chạy thêm các file bổ sung khi cần:
 > - [`supabase/storage.sql`](./supabase/storage.sql) — bật tải ảnh đại diện
 > - [`supabase/push.sql`](./supabase/push.sql) — bật Web Push
-> - [`supabase/deletes.sql`](./supabase/deletes.sql) — bật xóa tin nhắn & hội thoại
+> - [`supabase/per_user_delete.sql`](./supabase/per_user_delete.sql) — bật xóa tin nhắn & hội thoại (chỉ ẩn ở phía người xóa)
 
 ### Bước 3 — Bật đăng nhập Google
 
