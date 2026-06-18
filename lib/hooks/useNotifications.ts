@@ -90,20 +90,25 @@ export function useNotifications() {
         tag: options?.tag,
       };
 
+      // Thử Notification API trực tiếp trước (chạy ổn định trên trình duyệt máy tính).
       try {
-        // Ưu tiên service worker (hoạt động cả trên Android).
+        const n = new Notification(title, opts);
+        n.onclick = () => {
+          window.focus();
+          n.close();
+        };
+        return;
+      } catch {
+        // Trên Android, new Notification() bị chặn -> phải dùng service worker.
+      }
+
+      try {
         if (swRegRef.current) {
           swRegRef.current.showNotification(title, opts);
-        } else if (navigator.serviceWorker?.ready) {
-          navigator.serviceWorker.ready.then((reg) =>
-            reg.showNotification(title, opts)
-          );
-        } else {
-          const n = new Notification(title, opts);
-          n.onclick = () => {
-            window.focus();
-            n.close();
-          };
+        } else if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.ready
+            .then((reg) => reg.showNotification(title, opts))
+            .catch(() => {});
         }
       } catch {
         // Bỏ qua lỗi tạo notification.

@@ -39,6 +39,8 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
   const activeConvRef = useRef<string | null>(null);
   const profileMap = useRef<Record<string, Profile>>({});
   const onIncomingRef = useRef<(m: Message) => void>(() => {});
+  const onDeleteMessageRef = useRef<(old: { id: string }) => void>(() => {});
+  const onDeleteConvRef = useRef<(old: { id: string }) => void>(() => {});
   const loadConvTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ---- Tải dữ liệu -------------------------------------------------------
@@ -239,6 +241,51 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
     scheduleLoadConversations();
   };
 
+  // Đồng bộ khi tin nhắn / hội thoại bị xóa ở nơi khác (realtime).
+  onDeleteMessageRef.current = (old) => {
+    setMessages((prev) => prev.filter((m) => m.id !== old.id));
+    scheduleLoadConversations();
+  };
+
+  onDeleteConvRef.current = (old) => {
+    if (activeConvRef.current === old.id) {
+      setActiveConv(null);
+      activeConvRef.current = null;
+      setMessages([]);
+    }
+    setConversations((prev) => prev.filter((c) => c.id !== old.id));
+    scheduleLoadConversations();
+  };
+
+  // ---- Xóa ---------------------------------------------------------------
+  const handleDeleteMessage = useCallback(
+    async (id: string) => {
+      setMessages((prev) => prev.filter((m) => m.id !== id)); // optimistic
+      const { error } = await supabase.from("messages").delete().eq("id", id);
+      if (error) console.error("Xóa tin nhắn thất bại:", error.message);
+      scheduleLoadConversations();
+    },
+    [supabase, scheduleLoadConversations]
+  );
+
+  const handleDeleteConversation = useCallback(async () => {
+    const convId = activeConvRef.current;
+    if (!convId) return;
+    setActiveConv(null);
+    activeConvRef.current = null;
+    setMessages([]);
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    setMobileView("list");
+    const { error } = await supabase
+      .from("conversations")
+      .delete()
+      .eq("id", convId);
+    if (error) {
+      console.error("Xóa hội thoại thất bại:", error.message);
+      loadConversations();
+    }
+  }, [supabase, loadConversations]);
+
   // ---- Khởi tạo: tải dữ liệu, heartbeat online, đăng ký realtime --------
   useEffect(() => {
     loadConversations();
@@ -255,11 +302,21 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
     const heartbeat = setInterval(updateLastSeen, 30_000);
 
     const channel = supabase
-      .channel("messages-realtime")
+      .channel("db-realtime")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => onIncomingRef.current(payload.new as Message)
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "messages" },
+        (payload) => onDeleteMessageRef.current(payload.old as { id: string })
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "conversations" },
+        (payload) => onDeleteConvRef.current(payload.old as { id: string })
       )
       .subscribe();
 
@@ -363,6 +420,8 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
           sending={false}
           onSend={handleSend}
           onBack={() => setMobileView("list")}
+          onDeleteMessage={handleDeleteMessage}
+          onDeleteConversation={handleDeleteConversation}
         />
       </div>
 

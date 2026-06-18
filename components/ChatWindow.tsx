@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { ArrowLeft, MoreHorizontal, Phone, Video } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowLeft,
+  MoreHorizontal,
+  Phone,
+  Video,
+  Trash2,
+} from "lucide-react";
 import Avatar from "./Avatar";
 import MessageInput from "./MessageInput";
 import type { Conversation, Message, Profile } from "@/lib/types";
@@ -20,6 +26,8 @@ type ChatWindowProps = {
   sending: boolean;
   onSend: (text: string) => void;
   onBack: () => void;
+  onDeleteMessage: (id: string) => void;
+  onDeleteConversation: () => void;
 };
 
 export default function ChatWindow({
@@ -30,8 +38,11 @@ export default function ChatWindow({
   sending,
   onSend,
   onBack,
+  onDeleteMessage,
+  onDeleteConversation,
 }: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Tự cuộn xuống cuối khi có tin nhắn mới / đổi cuộc trò chuyện.
   useEffect(() => {
@@ -95,9 +106,40 @@ export default function ChatWindow({
           <button className="rounded-full p-2 transition hover:bg-gray-100 hover:text-zalo-blue">
             <Video size={20} />
           </button>
-          <button className="rounded-full p-2 transition hover:bg-gray-100 hover:text-zalo-blue">
-            <MoreHorizontal size={20} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              className="rounded-full p-2 transition hover:bg-gray-100 hover:text-zalo-blue"
+              title="More"
+            >
+              <MoreHorizontal size={20} />
+            </button>
+            {menuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setMenuOpen(false)}
+                />
+                <div className="absolute right-0 top-full z-20 mt-1 w-56 overflow-hidden rounded-xl border border-gray-100 bg-white py-1 shadow-lg">
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      if (
+                        confirm(
+                          "Delete this entire conversation? All messages will be removed for both people."
+                        )
+                      ) {
+                        onDeleteConversation();
+                      }
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50"
+                  >
+                    <Trash2 size={16} /> Delete conversation
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -112,7 +154,7 @@ export default function ChatWindow({
             Say hi to start the conversation 👋
           </div>
         ) : (
-          <MessageGroups me={me} messages={messages} />
+          <MessageGroups me={me} messages={messages} onDelete={onDeleteMessage} />
         )}
         <div ref={bottomRef} />
       </div>
@@ -123,15 +165,19 @@ export default function ChatWindow({
   );
 }
 
-// Hiển thị tin nhắn kèm phân tách theo ngày.
+// Hiển thị tin nhắn kèm phân tách theo ngày + nút xóa tin của chính mình.
 function MessageGroups({
   me,
   messages,
+  onDelete,
 }: {
   me: Profile;
   messages: Message[];
+  onDelete: (id: string) => void;
 }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   let lastDate = "";
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-0.5">
       {messages.map((m, i) => {
@@ -160,16 +206,36 @@ function MessageGroups({
             )}
             <div
               className={cn(
-                "flex animate-fade-in",
+                "group flex items-center gap-1.5 animate-fade-in",
                 mine ? "justify-end" : "justify-start",
                 grouped ? "mt-0.5" : "mt-2"
               )}
             >
+              {mine && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm("Delete this message?")) onDelete(m.id);
+                  }}
+                  title="Delete message"
+                  className={cn(
+                    "flex-shrink-0 rounded-full p-1.5 text-gray-400 transition hover:bg-gray-200 hover:text-red-500",
+                    selectedId === m.id
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
+                  )}
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
               <div
+                onClick={() =>
+                  mine && setSelectedId(selectedId === m.id ? null : m.id)
+                }
                 className={cn(
                   "max-w-[78%] rounded-2xl px-3.5 py-2 text-sm shadow-sm md:max-w-[65%]",
                   mine
-                    ? "rounded-br-md bg-zalo-bubble text-white"
+                    ? "cursor-pointer rounded-br-md bg-zalo-bubble text-white"
                     : "rounded-bl-md bg-white text-gray-900"
                 )}
                 title={new Date(m.created_at).toLocaleString("en-US")}

@@ -38,7 +38,10 @@
 2. Mở file [`supabase/schema.sql`](./supabase/schema.sql) trong repo này, **copy toàn bộ** và dán vào.
 3. Nhấn **Run**. Lệnh sẽ tạo bảng, hàm, trigger, RLS, bật realtime và tạo bucket `avatars` để đổi ảnh đại diện.
 
-> Nếu bạn đã chạy `schema.sql` từ trước (chưa có phần avatar), chỉ cần chạy thêm file [`supabase/storage.sql`](./supabase/storage.sql) để bật tính năng tải ảnh đại diện.
+> Nếu bạn đã chạy `schema.sql` từ trước, chỉ cần chạy thêm các file bổ sung khi cần:
+> - [`supabase/storage.sql`](./supabase/storage.sql) — bật tải ảnh đại diện
+> - [`supabase/push.sql`](./supabase/push.sql) — bật Web Push
+> - [`supabase/deletes.sql`](./supabase/deletes.sql) — bật xóa tin nhắn & hội thoại
 
 ### Bước 3 — Bật đăng nhập Google
 

@@ -334,4 +334,18 @@ drop policy if exists "push_subs_delete_own" on public.push_subscriptions;
 create policy "push_subs_delete_own" on public.push_subscriptions
   for delete to authenticated using (user_id = auth.uid());
 
+-- =============================================================
+--  QUYỀN XÓA — tin nhắn & hội thoại
+-- =============================================================
+drop policy if exists "messages_delete_own" on public.messages;
+create policy "messages_delete_own" on public.messages
+  for delete to authenticated using (sender_id = auth.uid());
+
+drop policy if exists "conversations_delete" on public.conversations;
+create policy "conversations_delete" on public.conversations
+  for delete to authenticated using (public.is_participant(id, auth.uid()));
+
+-- Gửi đủ dữ liệu khi xóa để realtime đồng bộ việc xóa tin nhắn.
+alter table public.messages replica identity full;
+
 -- HẾT. Sau khi chạy xong, ứng dụng đã sẵn sàng hoạt động.
