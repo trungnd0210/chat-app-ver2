@@ -137,7 +137,18 @@ export default function ProfileModal({
               onChange={handleFile}
               className="hidden"
             />
-            <p className="mt-2 text-xs text-gray-400">Tap the camera to upload</p>
+            {avatarUrl ? (
+              <button
+                onClick={() => setAvatarUrl("")}
+                className="mt-2 text-xs font-medium text-red-500 transition hover:underline"
+              >
+                Remove photo (use letter avatar)
+              </button>
+            ) : (
+              <p className="mt-2 text-xs text-gray-400">
+                Using letter avatar from your name
+              </p>
+            )}
           </div>
 
           {/* Tên hiển thị */}
