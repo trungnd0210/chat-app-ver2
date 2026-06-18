@@ -212,12 +212,22 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
 
   // ---- Xử lý tin đến qua realtime ---------------------------------------
   onIncomingRef.current = (m: Message) => {
-    if (m.conversation_id === activeConvRef.current) {
+    const isActive = m.conversation_id === activeConvRef.current;
+    const visible =
+      typeof document !== "undefined" &&
+      document.visibilityState === "visible";
+
+    if (isActive) {
       setMessages((prev) =>
         prev.some((x) => x.id === m.id) ? prev : [...prev, m]
       );
-      if (m.sender_id !== me.id) markAsRead(m.conversation_id);
-    } else if (m.sender_id !== me.id) {
+      if (m.sender_id !== me.id && visible) markAsRead(m.conversation_id);
+    }
+
+    // Thông báo khi tin đến từ người khác và (không phải hội thoại đang mở
+    // HOẶC tab không ở foreground). notify() tự quyết định có hiện thông báo
+    // hệ thống hay không dựa trên trạng thái hiển thị của tab.
+    if (m.sender_id !== me.id && (!isActive || !visible)) {
       const sender = profileMap.current[m.sender_id];
       const name = sender?.full_name || sender?.email || "New message";
       notify(name, m.content, {

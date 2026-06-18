@@ -5,9 +5,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type PermissionState = "default" | "granted" | "denied" | "unsupported";
 
 // Hook quản lý thông báo trình duyệt + âm thanh báo tin nhắn mới.
+// Dùng Service Worker để hiển thị thông báo (chạy được cả trên Android).
 export function useNotifications() {
   const [permission, setPermission] = useState<PermissionState>("default");
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const swRegRef = useRef<ServiceWorkerRegistration | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("Notification" in window)) {
@@ -15,6 +17,16 @@ export function useNotifications() {
       return;
     }
     setPermission(Notification.permission as PermissionState);
+
+    // Đăng ký service worker (cần cho thông báo trên Android & Web Push).
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => {
+          swRegRef.current = reg;
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const requestPermission = useCallback(async () => {
@@ -58,26 +70,39 @@ export function useNotifications() {
   const notify = useCallback(
     (title: string, body: string, options?: { icon?: string; tag?: string }) => {
       playSound();
+
       if (
         typeof window === "undefined" ||
         !("Notification" in window) ||
         Notification.permission !== "granted" ||
         document.visibilityState === "visible"
       ) {
-        // Khi tab đang mở thì không bắn notification hệ thống (đã có âm thanh +
-        // badge trong app), tránh làm phiền.
+        // Khi tab đang ở foreground thì không bắn thông báo hệ thống (đã có âm
+        // thanh + badge trong app), tránh làm phiền.
         return;
       }
+
+      const opts: NotificationOptions = {
+        body,
+        icon: options?.icon,
+        tag: options?.tag,
+      };
+
       try {
-        const n = new Notification(title, {
-          body,
-          icon: options?.icon,
-          tag: options?.tag,
-        });
-        n.onclick = () => {
-          window.focus();
-          n.close();
-        };
+        // Ưu tiên service worker (hoạt động cả trên Android).
+        if (swRegRef.current) {
+          swRegRef.current.showNotification(title, opts);
+        } else if (navigator.serviceWorker?.ready) {
+          navigator.serviceWorker.ready.then((reg) =>
+            reg.showNotification(title, opts)
+          );
+        } else {
+          const n = new Notification(title, opts);
+          n.onclick = () => {
+            window.focus();
+            n.close();
+          };
+        }
       } catch {
         // Bỏ qua lỗi tạo notification.
       }
