@@ -1,5 +1,5 @@
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 
 // Ghép className có điều kiện (thay cho clsx, đủ dùng cho dự án nhỏ).
 export function cn(...classes: (string | false | null | undefined)[]) {
@@ -34,8 +34,8 @@ export function formatConversationTime(iso: string | null): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (isToday(date)) return format(date, "HH:mm");
-  if (isYesterday(date)) return "Hôm qua";
-  return format(date, "dd/MM/yyyy");
+  if (isYesterday(date)) return "Yesterday";
+  return format(date, "MM/dd/yyyy");
 }
 
 // Định dạng thời gian chi tiết cho từng tin nhắn.
@@ -45,11 +45,11 @@ export function formatMessageTime(iso: string): string {
 
 // Trạng thái hoạt động dựa trên last_seen.
 export function formatLastSeen(iso: string | null): string {
-  if (!iso) return "Không hoạt động";
+  if (!iso) return "Offline";
   const date = new Date(iso);
   const diffMs = Date.now() - date.getTime();
-  if (diffMs < 60_000) return "Đang hoạt động";
-  return `Hoạt động ${formatDistanceToNow(date, { locale: vi, addSuffix: false })} trước`;
+  if (diffMs < 60_000) return "Active now";
+  return `Active ${formatDistanceToNow(date, { locale: enUS, addSuffix: false })} ago`;
 }
 
 export function isOnline(iso: string | null): boolean {

@@ -20,6 +20,7 @@ type SidebarProps = {
   onSelect: (conv: Conversation) => void;
   onNewChat: () => void;
   onSignOut: () => void;
+  onOpenProfile: () => void;
 };
 
 export default function Sidebar({
@@ -32,6 +33,7 @@ export default function Sidebar({
   onSelect,
   onNewChat,
   onSignOut,
+  onOpenProfile,
 }: SidebarProps) {
   const [query, setQuery] = useState("");
 
@@ -47,19 +49,25 @@ export default function Sidebar({
 
   return (
     <aside className="flex h-full w-full flex-col bg-white md:w-[340px] md:border-r md:border-gray-200">
-      {/* Header: avatar của tôi + nút tạo cuộc trò chuyện */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        <Avatar src={me.avatar_url} name={me.full_name} size={40} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-gray-900">
-            {me.full_name || me.email}
-          </p>
-          <p className="truncate text-xs text-gray-400">Đang trực tuyến</p>
-        </div>
+      {/* Header: avatar của tôi (bấm để chỉnh sửa hồ sơ) + nút tạo cuộc trò chuyện */}
+      <div className="flex items-center gap-2 px-3 py-3">
+        <button
+          onClick={onOpenProfile}
+          title="Edit profile"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 text-left transition hover:bg-gray-100"
+        >
+          <Avatar src={me.avatar_url} name={me.full_name} size={40} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-semibold text-gray-900">
+              {me.full_name || me.email}
+            </p>
+            <p className="truncate text-xs text-gray-400">Online</p>
+          </div>
+        </button>
         {notifPermission !== "granted" && notifPermission !== "unsupported" && (
           <button
             onClick={onEnableNotifications}
-            title="Bật thông báo"
+            title="Enable notifications"
             className="rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-zalo-blue"
           >
             {notifPermission === "denied" ? (
@@ -71,7 +79,7 @@ export default function Sidebar({
         )}
         <button
           onClick={onNewChat}
-          title="Cuộc trò chuyện mới"
+          title="New chat"
           className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-zalo-blue"
         >
           <SquarePen size={20} />
@@ -79,7 +87,7 @@ export default function Sidebar({
         {/* Đăng xuất — chỉ hiện trên mobile (desktop đã có ở thanh dọc) */}
         <button
           onClick={onSignOut}
-          title="Đăng xuất"
+          title="Sign out"
           className="rounded-full p-2 text-gray-600 transition hover:bg-gray-100 hover:text-red-500 md:hidden"
         >
           <LogOut size={20} />
@@ -93,7 +101,7 @@ export default function Sidebar({
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Tìm kiếm"
+            placeholder="Search"
             className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
           />
         </div>
@@ -106,13 +114,13 @@ export default function Sidebar({
         ) : filtered.length === 0 ? (
           <div className="px-6 py-10 text-center text-sm text-gray-400">
             {query
-              ? "Không tìm thấy cuộc trò chuyện."
-              : "Chưa có cuộc trò chuyện nào. Nhấn ✎ để bắt đầu."}
+              ? "No conversations found."
+              : "No conversations yet. Tap ✎ to start one."}
           </div>
         ) : (
           filtered.map((c) => {
             const active = c.id === activeId;
-            const name = c.other.full_name || c.other.email || "Người dùng";
+            const name = c.other.full_name || c.other.email || "User";
             return (
               <button
                 key={c.id}
@@ -144,7 +152,7 @@ export default function Sidebar({
                           : "text-gray-500"
                       )}
                     >
-                      {c.last_message || "Bắt đầu trò chuyện"}
+                      {c.last_message || "Start a conversation"}
                     </p>
                     {c.unread > 0 && (
                       <span className="flex h-5 min-w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-semibold text-white">

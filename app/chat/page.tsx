@@ -25,7 +25,7 @@ export default async function ChatPage() {
     id: user.id,
     email: user.email ?? null,
     full_name:
-      (user.user_metadata?.full_name as string) ?? user.email ?? "Tôi",
+      (user.user_metadata?.full_name as string) ?? user.email ?? "Me",
     avatar_url: (user.user_metadata?.avatar_url as string) ?? null,
     last_seen: new Date().toISOString(),
   };

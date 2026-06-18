@@ -47,9 +47,7 @@ export default function NewChatModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Cuộc trò chuyện mới
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">New chat</h2>
           <button
             onClick={onClose}
             className="rounded-full p-1.5 text-gray-500 transition hover:bg-gray-100"
@@ -65,7 +63,7 @@ export default function NewChatModal({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm theo tên hoặc email"
+              placeholder="Search by name or email"
               className="w-full bg-transparent text-sm outline-none placeholder:text-gray-400"
             />
           </div>
@@ -73,12 +71,12 @@ export default function NewChatModal({
 
         <div className="scrollbar-thin flex-1 overflow-y-auto px-2 pb-3">
           {loading ? (
-            <p className="py-8 text-center text-sm text-gray-400">Đang tải...</p>
+            <p className="py-8 text-center text-sm text-gray-400">Loading...</p>
           ) : filtered.length === 0 ? (
             <p className="py-8 text-center text-sm text-gray-400">
               {query
-                ? "Không tìm thấy người dùng phù hợp."
-                : "Chưa có người dùng nào khác. Hãy mời bạn bè đăng nhập!"}
+                ? "No matching users found."
+                : "No other users yet. Invite friends to sign in!"}
             </p>
           ) : (
             filtered.map((u) => (
@@ -95,7 +93,7 @@ export default function NewChatModal({
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-gray-900">
-                    {u.full_name || "Người dùng"}
+                    {u.full_name || "User"}
                   </p>
                   <p className="truncate text-xs text-gray-400">{u.email}</p>
                 </div>

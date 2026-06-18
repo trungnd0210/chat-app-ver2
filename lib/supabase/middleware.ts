@@ -6,6 +6,18 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 // Làm mới session Supabase trên mỗi request và điều hướng theo trạng thái đăng nhập.
 export async function updateSession(request: NextRequest) {
+  // Nếu OAuth code rơi vào trang gốc (do Site URL của Supabase), chuyển sang
+  // /auth/callback để đổi lấy session. Giúp đăng nhập hoạt động kể cả khi chưa
+  // cấu hình Redirect URLs khớp tuyệt đối.
+  if (
+    request.nextUrl.pathname === "/" &&
+    request.nextUrl.searchParams.has("code")
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {

@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Zalo Clone — Chat",
-  description: "Ứng dụng chat 1-1 realtime, đăng nhập bằng Google.",
+  title: "Chat",
+  description: "Realtime chat app.",
 };
 
 export const viewport: Viewport = {
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi">
+    <html lang="en">
       <body className="bg-zalo-bg text-gray-900">{children}</body>
     </html>
   );

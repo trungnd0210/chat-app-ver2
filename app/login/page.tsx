@@ -35,10 +35,8 @@ export default function LoginPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-zalo-blue text-white shadow-lg">
             <MessageCircle size={34} strokeWidth={2.4} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Zalo Clone Chat</h1>
-          <p className="mt-2 text-sm text-gray-500">
-            Nhắn tin nhanh, mượt và bảo mật. Đăng nhập để bắt đầu trò chuyện.
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Chat</h1>
+          <p className="mt-2 text-sm text-gray-500">Sign in to start chatting.</p>
         </div>
 
         <button
@@ -51,7 +49,7 @@ export default function LoginPage() {
           ) : (
             <GoogleIcon />
           )}
-          {loading ? "Đang chuyển hướng..." : "Đăng nhập bằng Google"}
+          {loading ? "Redirecting..." : "Sign in with Google"}
         </button>
 
         {error && (
@@ -59,11 +57,6 @@ export default function LoginPage() {
             {error}
           </p>
         )}
-
-        <p className="mt-8 text-center text-xs text-gray-400">
-          Bằng việc đăng nhập, bạn đồng ý cho ứng dụng lưu trữ tin nhắn của bạn
-          để phục vụ trò chuyện.
-        </p>
       </div>
     </div>
   );

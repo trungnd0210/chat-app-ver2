@@ -62,7 +62,7 @@ export default function MessageInput({ onSend, disabled }: MessageInputProps) {
         <button
           onClick={() => setShowEmoji((v) => !v)}
           className="flex-shrink-0 rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-zalo-blue"
-          title="Biểu tượng cảm xúc"
+          title="Emoji"
         >
           <Smile size={22} />
         </button>
@@ -74,7 +74,7 @@ export default function MessageInput({ onSend, disabled }: MessageInputProps) {
           onChange={handleInput}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder="Nhập tin nhắn..."
+          placeholder="Type a message..."
           className="scrollbar-thin max-h-[140px] flex-1 resize-none rounded-2xl bg-gray-100 px-4 py-2.5 text-sm outline-none transition focus:bg-white focus:ring-2 focus:ring-zalo-blue/40 disabled:opacity-60"
         />
 
@@ -82,7 +82,7 @@ export default function MessageInput({ onSend, disabled }: MessageInputProps) {
           onClick={handleSend}
           disabled={!text.trim() || disabled}
           className="flex-shrink-0 rounded-full bg-zalo-blue p-2.5 text-white transition hover:bg-zalo-blue-dark disabled:cursor-not-allowed disabled:bg-gray-300"
-          title="Gửi"
+          title="Send"
         >
           <Send size={20} />
         </button>

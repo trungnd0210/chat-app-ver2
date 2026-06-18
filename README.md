@@ -1,6 +1,6 @@
-# 💬 Zalo Clone Chat
+# 💬 Chat
 
-Ứng dụng web chat **1-1** clone giao diện Zalo, **đăng nhập bằng Google**, tin nhắn **realtime** mượt mà, lưu trữ trong database, và có **thông báo**. Thiết kế để **deploy 1 chạm lên Vercel**.
+Ứng dụng web chat **1-1** (giao diện tiếng Anh, lấy cảm hứng từ Zalo), **đăng nhập bằng Google**, tin nhắn **realtime** mượt mà, lưu trữ trong database, và có **thông báo**. Thiết kế để **deploy 1 chạm lên Vercel**.
 
 ## ✨ Tính năng
 
@@ -8,8 +8,9 @@
 - 💬 Nhắn tin 1-1 thời gian thực (Supabase Realtime)
 - 🗄️ Lưu lịch sử chat trong Postgres (Supabase)
 - 🔔 Thông báo trình duyệt + âm thanh + badge tin chưa đọc
-- 🟢 Trạng thái "đang hoạt động" / "hoạt động X phút trước"
-- 📱 Giao diện kiểu Zalo, responsive cho cả điện thoại và máy tính
+- 🟢 Trạng thái "Active now" / "Active X ago"
+- 👤 Đổi **tên hiển thị** và **ảnh đại diện** ngay trong app (bấm avatar góc trái)
+- 📱 Giao diện responsive cho cả điện thoại và máy tính
 - 🔒 Bảo mật dữ liệu bằng Row Level Security (mỗi người chỉ đọc được tin của mình)
 
 ## 🧱 Công nghệ
@@ -35,7 +36,9 @@
 
 1. Trong Supabase, mở **SQL Editor** → **New query**.
 2. Mở file [`supabase/schema.sql`](./supabase/schema.sql) trong repo này, **copy toàn bộ** và dán vào.
-3. Nhấn **Run**. Lệnh sẽ tạo bảng, hàm, trigger, RLS và bật realtime.
+3. Nhấn **Run**. Lệnh sẽ tạo bảng, hàm, trigger, RLS, bật realtime và tạo bucket `avatars` để đổi ảnh đại diện.
+
+> Nếu bạn đã chạy `schema.sql` từ trước (chưa có phần avatar), chỉ cần chạy thêm file [`supabase/storage.sql`](./supabase/storage.sql) để bật tính năng tải ảnh đại diện.
 
 ### Bước 3 — Bật đăng nhập Google
 

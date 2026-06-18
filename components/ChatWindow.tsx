@@ -53,11 +53,9 @@ export default function ChatWindow({
               />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-gray-700">
-            Chào mừng đến Zalo Clone
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-700">Welcome to Chat</h2>
           <p className="mt-1 text-sm text-gray-500">
-            Chọn một cuộc trò chuyện để bắt đầu nhắn tin.
+            Select a conversation to start messaging.
           </p>
         </div>
       </section>
@@ -65,7 +63,7 @@ export default function ChatWindow({
   }
 
   const name =
-    conversation.other.full_name || conversation.other.email || "Người dùng";
+    conversation.other.full_name || conversation.other.email || "User";
   const online = isOnline(conversation.other.last_seen);
 
   return (
@@ -87,7 +85,7 @@ export default function ChatWindow({
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-gray-900">{name}</p>
           <p className="truncate text-xs text-gray-400">
-            {online ? "Đang hoạt động" : formatLastSeen(conversation.other.last_seen)}
+            {online ? "Active now" : formatLastSeen(conversation.other.last_seen)}
           </p>
         </div>
         <div className="flex items-center gap-1 text-gray-500">
@@ -111,10 +109,10 @@ export default function ChatWindow({
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center text-sm text-gray-400">
-            Hãy gửi lời chào để bắt đầu cuộc trò chuyện 👋
+            Say hi to start the conversation 👋
           </div>
         ) : (
-          <MessageGroups me={me} messages={messages} otherName={name} />
+          <MessageGroups me={me} messages={messages} />
         )}
         <div ref={bottomRef} />
       </div>
@@ -129,18 +127,16 @@ export default function ChatWindow({
 function MessageGroups({
   me,
   messages,
-  otherName,
 }: {
   me: Profile;
   messages: Message[];
-  otherName: string;
 }) {
   let lastDate = "";
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-0.5">
       {messages.map((m, i) => {
         const mine = m.sender_id === me.id;
-        const dateLabel = new Date(m.created_at).toLocaleDateString("vi-VN");
+        const dateLabel = new Date(m.created_at).toLocaleDateString("en-US");
         const showDate = dateLabel !== lastDate;
         lastDate = dateLabel;
 
@@ -176,7 +172,7 @@ function MessageGroups({
                     ? "rounded-br-md bg-zalo-bubble text-white"
                     : "rounded-bl-md bg-white text-gray-900"
                 )}
-                title={new Date(m.created_at).toLocaleString("vi-VN")}
+                title={new Date(m.created_at).toLocaleString("en-US")}
               >
                 <p className="whitespace-pre-wrap break-words">{m.content}</p>
                 <p

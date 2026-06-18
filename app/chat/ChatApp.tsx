@@ -9,6 +9,7 @@ import Avatar from "@/components/Avatar";
 import Sidebar from "@/components/Sidebar";
 import ChatWindow from "@/components/ChatWindow";
 import NewChatModal from "@/components/NewChatModal";
+import ProfileModal from "@/components/ProfileModal";
 import type {
   Conversation,
   ConversationRow,
@@ -16,10 +17,11 @@ import type {
   Profile,
 } from "@/lib/types";
 
-export default function ChatApp({ me }: { me: Profile }) {
+export default function ChatApp({ me: initialMe }: { me: Profile }) {
   const supabase = useMemo(() => createClient(), []);
   const { permission, requestPermission, notify } = useNotifications();
 
+  const [me, setMe] = useState<Profile>(initialMe);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -29,6 +31,7 @@ export default function ChatApp({ me }: { me: Profile }) {
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [newChatOpen, setNewChatOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
 
   // Refs để callback realtime luôn đọc được giá trị mới nhất (tránh stale closure).
@@ -55,7 +58,7 @@ export default function ChatApp({ me }: { me: Profile }) {
   const loadConversations = useCallback(async () => {
     const { data, error } = await supabase.rpc("get_my_conversations");
     if (error) {
-      console.error("Lỗi tải hội thoại:", error.message);
+      console.error("Failed to load conversations:", error.message);
       setLoadingConvs(false);
       return;
     }
@@ -148,7 +151,7 @@ export default function ChatApp({ me }: { me: Profile }) {
         other_user_id: user.id,
       });
       if (error) {
-        console.error("Lỗi tạo hội thoại:", error.message);
+        console.error("Failed to create conversation:", error.message);
         return;
       }
       const convId = data as string;
@@ -190,7 +193,7 @@ export default function ChatApp({ me }: { me: Profile }) {
         .single();
 
       if (error) {
-        console.error("Gửi tin thất bại:", error.message);
+        console.error("Failed to send message:", error.message);
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
         return;
       }
@@ -216,7 +219,7 @@ export default function ChatApp({ me }: { me: Profile }) {
       if (m.sender_id !== me.id) markAsRead(m.conversation_id);
     } else if (m.sender_id !== me.id) {
       const sender = profileMap.current[m.sender_id];
-      const name = sender?.full_name || sender?.email || "Tin nhắn mới";
+      const name = sender?.full_name || sender?.email || "New message";
       notify(name, m.content, {
         icon: sender?.avatar_url || undefined,
         tag: m.conversation_id,
@@ -274,11 +277,13 @@ export default function ChatApp({ me }: { me: Profile }) {
           <MessageCircle size={24} />
         </div>
         <div className="flex flex-col items-center gap-4">
-          <Avatar src={me.avatar_url} name={me.full_name} size={40} />
+          <button onClick={() => setProfileOpen(true)} title="Edit profile">
+            <Avatar src={me.avatar_url} name={me.full_name} size={40} />
+          </button>
           <form action={signOut}>
             <button
               type="submit"
-              title="Đăng xuất"
+              title="Sign out"
               className="rounded-lg p-2 text-white/80 transition hover:bg-white/15 hover:text-white"
             >
               <LogOut size={20} />
@@ -303,6 +308,7 @@ export default function ChatApp({ me }: { me: Profile }) {
           onSelect={selectConversation}
           onNewChat={() => setNewChatOpen(true)}
           onSignOut={() => signOut()}
+          onOpenProfile={() => setProfileOpen(true)}
         />
       </div>
 
@@ -329,6 +335,16 @@ export default function ChatApp({ me }: { me: Profile }) {
         loading={loadingUsers}
         onClose={() => setNewChatOpen(false)}
         onSelectUser={startChatWithUser}
+      />
+
+      <ProfileModal
+        open={profileOpen}
+        me={me}
+        onClose={() => setProfileOpen(false)}
+        onSaved={(updated) => {
+          setMe(updated);
+          profileMap.current[updated.id] = updated;
+        }}
       />
     </div>
   );
