@@ -287,6 +287,22 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
     }
   }, [permission, supabase, me.id]);
 
+  // Bấm chuông: xin quyền + đăng ký push trong cùng một thao tác (chuẩn iOS),
+  // và báo lỗi rõ ràng nếu không bật được.
+  const handleEnableNotifications = useCallback(async () => {
+    const result = await requestPermission();
+    if (result !== "granted") {
+      alert("Bạn cần chọn 'Cho phép' (Allow) để bật thông báo.");
+      return;
+    }
+    const res = await subscribeToPush(supabase, me.id);
+    if (!res.ok && res.reason && res.reason !== "no-window") {
+      alert("Chưa bật được thông báo đẩy: " + res.reason);
+    } else if (res.ok) {
+      alert("Đã bật thông báo đẩy thành công!");
+    }
+  }, [requestPermission, supabase, me.id]);
+
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-zalo-bg">
       {/* Thanh điều hướng dọc (chỉ desktop) */}
@@ -322,7 +338,7 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
           activeId={activeConv?.id ?? null}
           loading={loadingConvs}
           notifPermission={permission}
-          onEnableNotifications={requestPermission}
+          onEnableNotifications={handleEnableNotifications}
           onSelect={selectConversation}
           onNewChat={() => {
             setNewChatOpen(true);

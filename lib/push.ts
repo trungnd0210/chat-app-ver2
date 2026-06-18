@@ -15,16 +15,25 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 // Đăng ký nhận Web Push cho người dùng hiện tại và lưu subscription vào DB.
-// Gọi sau khi đã được cấp quyền thông báo.
+// Trả về kết quả để hiển thị lỗi cho người dùng (đặc biệt hữu ích trên iOS).
+export type PushResult = { ok: boolean; reason?: string };
+
 export async function subscribeToPush(
   supabase: SupabaseClient,
   userId: string
-) {
+): Promise<PushResult> {
   try {
-    if (typeof window === "undefined") return;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-    if (Notification.permission !== "granted") return;
-    if (!VAPID_PUBLIC_KEY) return;
+    if (typeof window === "undefined") return { ok: false, reason: "no-window" };
+    if (!("serviceWorker" in navigator))
+      return { ok: false, reason: "Trình duyệt không hỗ trợ Service Worker." };
+    if (!("PushManager" in window))
+      return {
+        ok: false,
+        reason:
+          "Trình duyệt chưa hỗ trợ Push. Trên iPhone: cần iOS 16.4+, hãy thêm app vào Màn hình chính rồi mở từ icon đó.",
+      };
+    if (Notification.permission !== "granted")
+      return { ok: false, reason: "Chưa được cấp quyền thông báo." };
 
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
@@ -36,9 +45,10 @@ export async function subscribeToPush(
     }
 
     const json = sub.toJSON();
-    if (!json.endpoint || !json.keys) return;
+    if (!json.endpoint || !json.keys)
+      return { ok: false, reason: "Không lấy được thông tin subscription." };
 
-    await supabase.from("push_subscriptions").upsert(
+    const { error } = await supabase.from("push_subscriptions").upsert(
       {
         endpoint: json.endpoint,
         user_id: userId,
@@ -47,7 +57,11 @@ export async function subscribeToPush(
       },
       { onConflict: "endpoint" }
     );
-  } catch {
-    // Bỏ qua nếu trình duyệt không hỗ trợ hoặc người dùng từ chối.
+    if (error)
+      return { ok: false, reason: "Lỗi lưu subscription: " + error.message };
+
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: (e as Error)?.message || "Lỗi không xác định." };
   }
 }

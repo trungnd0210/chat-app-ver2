@@ -29,10 +29,12 @@ export function useNotifications() {
     }
   }, []);
 
-  const requestPermission = useCallback(async () => {
-    if (typeof window === "undefined" || !("Notification" in window)) return;
+  const requestPermission = useCallback(async (): Promise<PermissionState> => {
+    if (typeof window === "undefined" || !("Notification" in window))
+      return "unsupported";
     const result = await Notification.requestPermission();
     setPermission(result as PermissionState);
+    return result as PermissionState;
   }, []);
 
   // Tiếng "ting" ngắn tạo bằng Web Audio API (không cần file âm thanh).
