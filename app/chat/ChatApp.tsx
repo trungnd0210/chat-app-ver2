@@ -306,7 +306,10 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
           notifPermission={permission}
           onEnableNotifications={requestPermission}
           onSelect={selectConversation}
-          onNewChat={() => setNewChatOpen(true)}
+          onNewChat={() => {
+            setNewChatOpen(true);
+            loadUsers();
+          }}
           onSignOut={() => signOut()}
           onOpenProfile={() => setProfileOpen(true)}
         />
