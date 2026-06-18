@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Chat",
   description: "Realtime chat app.",
+  applicationName: "Chat",
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "Chat", statusBarStyle: "default" },
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };
 
 export const viewport: Viewport = {

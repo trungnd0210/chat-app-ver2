@@ -5,6 +5,7 @@ import { MessageCircle, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { signOut } from "@/app/actions";
 import { useNotifications } from "@/lib/hooks/useNotifications";
+import { subscribeToPush } from "@/lib/push";
 import Avatar from "@/components/Avatar";
 import Sidebar from "@/components/Sidebar";
 import ChatWindow from "@/components/ChatWindow";
@@ -278,6 +279,13 @@ export default function ChatApp({ me: initialMe }: { me: Profile }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Khi đã được cấp quyền thông báo -> đăng ký Web Push để nhận cả khi app đóng.
+  useEffect(() => {
+    if (permission === "granted") {
+      subscribeToPush(supabase, me.id);
+    }
+  }, [permission, supabase, me.id]);
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-zalo-bg">

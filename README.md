@@ -110,6 +110,31 @@ Xong! 🎉
 
 ---
 
+## 🔔 (Tùy chọn) Thông báo khi app đã ĐÓNG HẲN — Web Push
+
+Mặc định, thông báo chỉ hiện khi app đang mở/chạy nền. Để nhận thông báo cả khi
+đã đóng trình duyệt (như Zalo/Messenger), làm thêm các bước sau:
+
+1. **Tạo bảng**: chạy [`supabase/push.sql`](./supabase/push.sql) trong SQL Editor
+   (đã có sẵn nếu bạn chạy `schema.sql` bản mới).
+2. **Thêm Environment Variables trên Vercel** (Project Settings → Environment Variables):
+   - `VAPID_PRIVATE_KEY` — khóa VAPID riêng (tạo bằng `npx web-push generate-vapid-keys`,
+     khóa công khai tương ứng đặt vào `NEXT_PUBLIC_VAPID_PUBLIC_KEY`).
+   - `SUPABASE_SERVICE_ROLE_KEY` — secret key của Supabase (Settings → API Keys).
+   - `PUSH_WEBHOOK_SECRET` *(tùy chọn)* — một chuỗi ngẫu nhiên để bảo vệ webhook.
+   - Sau khi thêm, bấm **Redeploy**.
+3. **Tạo Database Webhook trong Supabase** (Database → Webhooks → Create):
+   - Table: `messages`, Events: **Insert**
+   - Type: **HTTP Request**, Method: **POST**
+   - URL: `https://<app>.vercel.app/api/push`
+   - *(Nếu dùng secret)* thêm header `Authorization: Bearer <PUSH_WEBHOOK_SECRET>`
+4. **Trên điện thoại**: cho phép thông báo. Riêng **iPhone (iOS)** phải
+   **Add to Home Screen** rồi mở app từ icon đó mới nhận được push.
+
+> Service worker (`public/sw.js`) và phần đăng ký phía client đã được tích hợp sẵn.
+
+---
+
 ## 📁 Cấu trúc thư mục
 
 ```
